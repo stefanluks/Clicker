@@ -21,7 +21,18 @@ public class Atributos{
     public string pause_pontos;
     public string pause_btnVoltar;
     public string pause_btnOpcoes;
+    public string pause_btnReiniciar;
     public string pause_btnVoltarPMenu;
+    public string gameover_pontos;
+    public string gameover_btnSalvar;
+    public string gameover_btnReiniciar;
+    public string gameover_btnVoltarPMenu;
+    public string gameover_msg_falha;
+    public string gameover_msg_sucesso;
+    public string tutorial_titulo;
+    public string tutorial_bola_vermelha;
+    public string tutorial_bolas_e_pontos;
+    public string tutorial_tempo;
     public string hud_pontos;
     public string hud_bolas;
     public string hud_debug;
@@ -64,7 +75,24 @@ public class LinguagemControle : MonoBehaviour
     [SerializeField] private Text p_titulo;
     [SerializeField] private Text p_btnVoltar;
     [SerializeField] private Text p_btnOpcoes;
+    [SerializeField] private Text p_btnReiniciar;
     [SerializeField] private Text p_btnVoltarPMenu;
+
+    [Header("-- GAME OVER --")]
+    [SerializeField] private Text GO_pontos;
+    [SerializeField] private Text GO_btnSalvar;
+    [SerializeField] private Text GO_btnReiniciar;
+    [SerializeField] private Text GO_btnVoltarPMenu;
+    [SerializeField] private Text GO_msg_falha;
+    [SerializeField] private Text GO_msg_sucesso;
+
+    [Header("-- TUTORIAL --")]
+    [SerializeField] private Text tutorial_titulo;
+    [SerializeField] private Text tutorial_pontos;
+    [SerializeField] private Text tutorial_bola_vermelha;
+    [SerializeField] private Text tutorial_bolas_e_pontos;
+    [SerializeField] private Text tutorial_tempo;
+
     
     [Header("-- HUD do jogo --")]
     private string h_pontos;
@@ -112,8 +140,20 @@ public class LinguagemControle : MonoBehaviour
         // Atuliazando tela de pause
         p_titulo.text = linguaSelecionada.atributos.pause_titulo;
         p_btnVoltar.text = linguaSelecionada.atributos.pause_btnVoltar;
+        p_btnReiniciar.text = linguaSelecionada.atributos.pause_btnReiniciar;
         p_btnOpcoes.text = linguaSelecionada.atributos.pause_btnOpcoes;
         p_btnVoltarPMenu.text = linguaSelecionada.atributos.pause_btnVoltarPMenu;
+        // Atuliazando tela de game over
+        GO_pontos.text = linguaSelecionada.atributos.gameover_pontos;
+        GO_btnSalvar.text = linguaSelecionada.atributos.gameover_btnSalvar;
+        GO_btnReiniciar.text = linguaSelecionada.atributos.gameover_btnReiniciar;
+        GO_btnVoltarPMenu.text = linguaSelecionada.atributos.gameover_btnVoltarPMenu;
+        // Atualizando tutorial
+        tutorial_titulo.text = linguaSelecionada.atributos.tutorial_titulo;
+        tutorial_pontos.text = linguaSelecionada.atributos.hud_pontos;
+        tutorial_bola_vermelha.text = linguaSelecionada.atributos.tutorial_bola_vermelha;
+        tutorial_bolas_e_pontos.text = linguaSelecionada.atributos.tutorial_bolas_e_pontos;
+        tutorial_tempo.text = linguaSelecionada.atributos.tutorial_tempo;
         // Atualizando HUD
         h_pontos = linguaSelecionada.atributos.hud_pontos;
         h_debug = linguaSelecionada.atributos.hud_debug;

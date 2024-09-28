@@ -7,20 +7,25 @@ public class GameController : MonoBehaviour
 {
 
     public bool debug = false;
+    private int JOGO_ID = 13;
 
     [Header("Bolas")]
     [SerializeField] private GameObject _bolaComum;
     [SerializeField] private GameObject _bolaDanger;
 
-    [Header("Interface")]
-    [SerializeField] private Text _HUD_pontos;
-    [SerializeField] private Button _HUD_btn_pause;
-    [SerializeField] private Text _HUD_debug;
-    [SerializeField] private Text _HUD_tempo;
+    [Header("Telas")]
     [SerializeField] private GameObject _menuPause;
     [SerializeField] private GameObject _ranking;
     [SerializeField] private GameObject _menuOpcoes;
     [SerializeField] private GameObject _menuPrincipal;
+    [SerializeField] private GameObject _menuGameOver;
+    [SerializeField] private GameObject _tutorial;
+
+    [Header("HUD")]
+    [SerializeField] private Text _HUD_pontos;
+    [SerializeField] private Button _HUD_btn_pause;
+    [SerializeField] private Text _HUD_debug;
+    [SerializeField] private Text _HUD_tempo;
 
     [Header("-- RANKING --")]
     [SerializeField] private List<Text> _fieldsRanking;
@@ -32,6 +37,13 @@ public class GameController : MonoBehaviour
     [SerializeField] private Image imgLigadoEfeito;
     [SerializeField] private Image imgMuteEfeito;
 
+    [Header("-- GAME OVER --")]
+    [SerializeField] private Text _pontosGameOver;
+    [SerializeField] private Image _msg_sucesso_GameOver;
+    [SerializeField] private Image _msg_falha_GameOver;
+    [SerializeField] private InputField nomeJogador;
+
+
     [Header("-- AUDIOS --")]
     [SerializeField] private AudioSource _clickBola;
     [SerializeField] private AudioSource _clickBtns;
@@ -42,8 +54,7 @@ public class GameController : MonoBehaviour
 
     // variaveis privadas não acessivéis
     private List<GameObject> _bolasNoJogo = new List<GameObject>();
-    private string abc = "abcdefghijklmnopqrstuvwxyz0123456789";
-    private bool pause = false, start = false;
+    private bool pause = false, start = false, gameover = false, tutorial = true;
     private int cont = 499, tempo = 500, bolas = 0, limiteBolas = 10, pontos = 0, flag = 100;
     private string telaAnterior = "menu";
     private int linguaID = 1;
@@ -58,6 +69,8 @@ public class GameController : MonoBehaviour
         _menuPause.SetActive(false);
         _menuOpcoes.SetActive(false);
         _ranking.SetActive(false);
+        _menuGameOver.SetActive(false);
+        _tutorial.SetActive(false);
         _HUD_btn_pause.gameObject.SetActive(false);
         _HUD_pontos.gameObject.SetActive(false);
         _HUD_tempo.gameObject.SetActive(false);
@@ -65,19 +78,25 @@ public class GameController : MonoBehaviour
     }
 
     void Update(){
-        if(start && !pause){
-            ControleBolas();
-            Click();
-            ControleDeTempo();
-            _HUD_pontos.text = LinguagemControle._instancia.GetHudTextTop(pontos,bolas,limiteBolas);
-            _HUD_tempo.text = "   "+ LinguagemControle._instancia.GetTempo(tempo - cont);
-            _pontosMenuPause.text =  LinguagemControle._instancia.GetPontuacao(pontos);
-        }
-        if(debug){
-            _HUD_debug.gameObject.SetActive(true);
-            _HUD_debug.text = LinguagemControle._instancia.GetDebug(cont, tempo, _musica, debug, efeitoSonoro, limiteBolas);
+        if(!gameover){
+            if(start && !pause){
+                ControleBolas();
+                Click();
+                ControleDeTempo();
+                _HUD_pontos.text = LinguagemControle._instancia.GetHudTextTop(pontos,bolas,limiteBolas);
+                _HUD_tempo.text = "   "+ LinguagemControle._instancia.GetTempo(tempo - cont);
+                _pontosMenuPause.text =  LinguagemControle._instancia.GetPontuacao(pontos);
+                _pontosGameOver.text =  LinguagemControle._instancia.GetPontuacao(pontos);
+            }
+            if(debug){
+                _HUD_debug.gameObject.SetActive(true);
+                _HUD_debug.text = LinguagemControle._instancia.GetDebug(cont, tempo, _musica, debug, efeitoSonoro, limiteBolas);
+            }else{
+                _HUD_debug.gameObject.SetActive(false);
+            }
+            if(bolas >= limiteBolas) gameover = true;
         }else{
-            _HUD_debug.gameObject.SetActive(false);
+            _menuGameOver.SetActive(true);
         }
         _clickBola.mute = efeitoSonoro;
         _clickBtns.mute = efeitoSonoro;
@@ -102,7 +121,13 @@ public class GameController : MonoBehaviour
     }
 
     public void Jogar(){
-        start = true;
+        if(tutorial){
+            _tutorial.SetActive(true);
+            tutorial = false;
+        }else{
+            _tutorial.SetActive(false);
+            start = true;
+        }
         _menuPrincipal.SetActive(false);
         _HUD_btn_pause.gameObject.SetActive(true);
         _HUD_pontos.gameObject.SetActive(true);
@@ -115,10 +140,36 @@ public class GameController : MonoBehaviour
         _menuOpcoes.SetActive(true);
     }
 
+    public void Salvar(){
+        SalvarPontuacao();
+    }
+
+    [System.Obsolete]
+    public void SalvarPontuacao(){
+        Pontuacao jogador = new Pontuacao();
+        jogador.nome = nomeJogador.text;
+        jogador.pontos = ""+pontos;
+        jogador.jogo = JOGO_ID;
+        StartCoroutine(RedeController._instancia.SavePontuacao(jogador, ResultadoSave));
+    }
+
+    void ResultadoSave(bool result){
+        if(result) _msg_sucesso_GameOver.gameObject.SetActive(true);
+        else _msg_falha_GameOver.gameObject.SetActive(true);
+        Invoke("DesativarMsg", 1f);
+    }
+
+    void DesativarMsg(){
+        _msg_falha_GameOver.gameObject.SetActive(false);
+        _msg_sucesso_GameOver.gameObject.SetActive(false);
+    }
+
+
+    [System.Obsolete]
     public void RankingPage(){
         _ranking.SetActive(true);
         _menuPrincipal.SetActive(false);
-        StartCoroutine(RedeController._instancia.GetRanking(ConfigurarRaking));
+        StartCoroutine(RedeController._instancia.GetRanking(JOGO_ID, ConfigurarRaking));
     }
 
     void DestruirBolas(){
@@ -134,17 +185,29 @@ public class GameController : MonoBehaviour
         else  _menuOpcoes.SetActive(false);
     }
 
+    public void Reiniciar(){
+        VoltarParaMenu();
+        _menuPrincipal.SetActive(false);
+        start = true;
+        telaAnterior = "jogo";
+        _HUD_btn_pause.gameObject.SetActive(true);
+        _HUD_pontos.gameObject.SetActive(true);
+        _HUD_tempo.gameObject.SetActive(true);
+    }
+
     public void VoltarParaMenu(){
         start = false;
         pause = false;
+        gameover = false;
         DestruirBolas();
-        cont = 998;
-        tempo = 1000;
+        cont = 0;
+        tempo = 500;
         bolas = 0;
         pontos = 0;
         flag = 100;
         telaAnterior = "menu";
         _menuPrincipal.SetActive(true);
+        _menuGameOver.SetActive(false);
         _menuOpcoes.SetActive(false);
         _menuPause.SetActive(false);
         _ranking.SetActive(false);
@@ -154,34 +217,40 @@ public class GameController : MonoBehaviour
     }
 
     void ConfigurarRaking(Ranking lista){
-        for(int i=0;i< 10; i++)
-        {
-            if(i >= lista.rankingGeral.Count) _fieldsRanking[i].gameObject.SetActive(false);
-            else _fieldsRanking[i].text = lista.rankingGeral[i].nome_do_jogador +"\n"+"Pontos:"+lista.rankingGeral[i].pontos_do_jogador;
+        if(lista != null){
+            for(int i=0;i< 10; i++)
+            {
+                if(i >= lista.content.ranking.Count) _fieldsRanking[i].gameObject.SetActive(false);
+                else _fieldsRanking[i].text = lista.content.ranking[i].nome +"\n"+"Pontos:"+lista.content.ranking[i].pontos;
+            }
         }
     }
 
     void ControleDeTempo(){
         if(pontos > flag){
             flag*=2;
-            if(tempo > 100) tempo -= 150;
-            else tempo -= 10;
+            limiteBolas = flag/10;
+            if(tempo > 200) tempo -= 150;
+            else if(tempo > 100) tempo -= 50;
+            else if(tempo > 50) tempo -= 5;
+            else tempo = 50;
         }
     }
 
     void AdicionarBola(){
         System.Random randNum = new System.Random();
         Vector3 pos = new Vector3(randNum.Next(-17,17), randNum.Next(9, 28), _bolaComum.transform.position.z);
-        // if(randNum.Next(0,1) == 0){
-        //     pos = new Vector3(-pos.x, pos.y, pos.z);
-        // }
-        GameObject nova = Instantiate(_bolaComum, pos, Quaternion.identity);
+        GameObject prefab = _bolaComum;
+        int sorte = randNum.Next(1,15);
+        Debug.Log("SORTE: "+sorte);
+        if(sorte == 1) prefab = _bolaDanger;
+        GameObject nova = Instantiate(prefab, pos, Quaternion.identity);
         _bolasNoJogo.Add(nova);
         bolas++;
     }
 
     void ControleBolas(){
-        if(cont == tempo){
+        if(cont >= tempo){
             AdicionarBola();
             cont = 0;
         }else{
@@ -196,14 +265,17 @@ public class GameController : MonoBehaviour
             if (Physics.Raycast(ray, out hit, 100f))
             {
                 if(hit.transform.gameObject.tag == "bola"){
-                    pontos+=8;
+                    pontos+=5;
                     bolas--;
                     _clickBola.Play();
                     Destroy(hit.transform.gameObject);
-                    // if(bolas == 0){
-                    //     cont = 0;
-                    //     AdicionarBola();
-                    // }
+                }
+                if(hit.transform.gameObject.tag == "bola-danger"){
+                    AdicionarBola();
+                    AdicionarBola();
+                    AdicionarBola();
+                    _clickBola.Play();
+                    Destroy(hit.transform.gameObject);
                 }
             }
         }

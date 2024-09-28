@@ -7,4 +7,5 @@
 
 
 ---
-  >## <br>![](./Assets/Sprites/icon-pc.png) <br> <a href="https://stefanlucas.com/JOGOSSLGAMES/Clicker.apk">download para arquivo .apk</a>
+  <!-- >## <br>![](./Assets/Sprites/icon-pc.png) <br> <a href="">Versão Web</a> -->
+  >## <br>![](./Assets/Sprites/icon-android.png) <br> <a href="./download/clicker-1.0.0.apk">Download arquivo .apk</a>
